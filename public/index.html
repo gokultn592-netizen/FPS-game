@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZOMBIE FIRE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="store_styles.css">
+    <script src="three.min.js" defer></script>
+    <script src="levels.js" defer></script>
+    <script src="game.js" defer></script>
+    <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+    <audio id="fire-sound" src="https://assets.mixkit.co/active_storage/sfx/2811/2811-preview.mp3" preload="auto"></audio>
+</head>
+<body>
+    <!-- Background for UI screens -->
+    <div id="ui-background"></div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="glass-panel">
+        <h1>TAMTHA FIRE</h1>
+        <p class="subtitle">Enter the Grid</p>
+        <div class="input-group">
+            <input type="text" id="username" placeholder="User ID" required autocomplete="off">
+            <input type="text" id="contact" placeholder="Email OR Mobile Number" required autocomplete="off">
+            <input type="password" id="password" placeholder="Passcode" required>
+        </div>
+        <button id="login-btn" class="glow-btn">INITIALIZE</button>
+        <p id="login-error" class="error-text"></p>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="home-screen" class="glass-panel hidden">
+        <h2>ZOMBIE BASE</h2>
+        <div class="player-info">
+            <span id="player-name-display">Operator</span>
+            <span class="wallet">💰 <span id="global-coins">0</span></span>
+        </div>
+        <div class="loadout-display">
+            <div>Character: <span id="eq-char" class="eq-text">Adam</span></div>
+            <div>Weapon: <span id="eq-gun" class="eq-text">G18</span></div>
+        </div>
+        <div class="difficulty-selector">
+            <label>DIFFICULTY:</label>
+            <div class="diff-btns">
+                <button id="diff-easy" class="diff-btn" data-diff="easy">EASY</button>
+                <button id="diff-med" class="diff-btn active" data-diff="med">MEDIUM</button>
+                <button id="diff-hard" class="diff-btn" data-diff="hard">HARD</button>
+            </div>
+        </div>
+        <div class="main-buttons">
+            <button id="open-levels-btn" class="glow-btn">MISSIONS</button>
+            <button id="open-store-btn" class="glow-btn store-btn">STORE</button>
+        </div>
+    </div>
+
+    <!-- Store Screen -->
+    <div id="store-screen" class="glass-panel hidden">
+        <h2>STORE</h2>
+        <div class="wallet-bar">Balance: 💰 <span id="store-coins">0</span></div>
+        <div class="store-tabs">
+            <button id="tab-chars" class="tab-btn active">Characters</button>
+            <button id="tab-guns" class="tab-btn">Weapons</button>
+        </div>
+        <div id="store-grid" class="store-grid">
+            <!-- Populated by JS -->
+        </div>
+        <button id="close-store-btn" class="glow-btn">BACK</button>
+    </div>
+
+    <!-- Main Menu / Level Select -->
+    <div id="menu-screen" class="glass-panel hidden">
+        <h2>MISSION SELECT</h2>
+        <button id="back-home-btn" class="glow-btn small-btn" style="margin-bottom:10px;">HOME PAGE</button>
+        <div id="level-grid" class="level-grid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Game HUD -->
+    <div id="game-ui" class="hidden">
+        <div id="crosshair"></div>
+        <div id="timer-display">00:00</div>
+        <div class="hud-top">
+            <div class="level-indicator">LVL <span id="hud-level">1</span></div>
+            <div class="objective">Zombies: <span id="hud-targets">0/10</span></div>
+            <div class="coin-hud">🪙 <span id="hud-coins">0</span></div>
+        </div>
+        <div class="hud-bottom">
+            <div class="health-bar-container">
+                <div class="health-bar" id="hud-health"></div>
+                <div class="health-text"><span id="hud-health-val">100</span> HP</div>
+            </div>
+            <div class="ammo-counter"><span id="hud-ammo">30</span>/30</div>
+            <div id="scope-btn-hint" class="scope-hint">Right Click: SCOPE</div>
+        </div>
+    </div>
+    
+    <div id="scope-overlay" class="hidden">
+        <div class="scope-lens"></div>
+        <div class="scope-crosshair"></div>
+    </div>
+
+    <!-- Game Over / Victory Modal -->
+    <div id="end-screen" class="glass-panel hidden">
+        <h2 id="end-title">MISSION COMPLETE</h2>
+        <p id="end-stats">Accuracy: 100%</p>
+        <p id="end-reward" class="reward-text">Mission Reward: 💰 0</p>
+        <div class="end-actions">
+            <button id="retry-level-btn" class="glow-btn hidden">RETRY</button>
+            <button id="next-level-btn" class="glow-btn hidden">NEXT MISSION</button>
+            <button id="open-missions-btn" class="glow-btn">MISSIONS</button>
+            <button id="return-menu-btn" class="glow-btn">HOME</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="hidden">
+        <div class="tutorial-card glass-panel" data-step="1">
+            <h3>WELCOME TO ZOMBIE FIRE</h3>
+            <div class="tut-icon">🎮</div>
+            <p>Move with WASD keys. Use SPACE to jump.</p>
+            <div class="tut-btns">
+                <button onclick="closeTutorial()" class="skip-btn">SKIP</button>
+                <button onclick="nextTutorialStep(1)" class="glow-btn">NEXT</button>
+            </div>
+        </div>
+        <div class="tutorial-card glass-panel" data-step="2">
+            <h3>COMBAT READY</h3>
+            <div class="tut-icon">🔫</div>
+            <p>LEFT CLICK to fire. RIGHT CLICK to use SCOPE.</p>
+            <div class="tut-btns">
+                <button onclick="closeTutorial()" class="skip-btn">SKIP</button>
+                <button onclick="nextTutorialStep(2)" class="glow-btn">NEXT</button>
+            </div>
+        </div>
+        <div class="tutorial-card glass-panel" data-step="3">
+            <h3>COLLECT & ELIMINATE</h3>
+            <div class="tut-icon">🧟</div>
+            <p>Gather coins and take out all zombies to clear the mission.</p>
+            <div class="tut-btns">
+                <button onclick="closeTutorial()" class="skip-btn">SKIP</button>
+                <button onclick="nextTutorialStep(3)" class="glow-btn">FINISH</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
